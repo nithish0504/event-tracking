@@ -195,7 +195,7 @@ export default function App() {
     console.error('Firestore Error: ', JSON.stringify(errInfo));
   };
   const [activeTab, setActiveTab] = useState<'home' | 'guests' | 'layout' | 'alerts' | 'track'>('home');
-  const [language, setLanguage] = useState<'en' | 'hi' | 'te'>('en');
+  const [language, setLanguage] = useState<'en' | 'hi' | 'te'>('te');
 
   const translations = {
     en: { 
@@ -646,11 +646,17 @@ export default function App() {
     try {
       await signInWithPopup(auth, provider);
     } catch (err: any) {
+      console.error("Login Error Details:", err);
       if (err.code === 'auth/popup-closed-by-user') {
         console.log("Sign-in popup closed by user.");
         return;
       }
-      console.error(err);
+      
+      if (err.code === 'auth/unauthorized-domain') {
+        alert("This domain is not authorized in your Firebase Console. Please add your .run.app domain to 'Authorized Domains' in the Firebase Auth settings.");
+      } else {
+        alert(`Login failed: ${err.message}. If the popup closed immediately, please ensure third-party cookies are enabled in your browser.`);
+      }
     }
   };
 
@@ -710,13 +716,26 @@ export default function App() {
     <div className="min-h-screen bg-background text-dark font-sans selection:bg-secondary/30">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-surface px-4 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/20 p-2">
-            <Train size={24} className="text-secondary" />
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <img 
+              src="https://res.cloudinary.com/dika0ttaj/image/upload/v1777146426/a8c235a0-b770-4a7f-8c7d-3a7c82e0552e_hv03iu.png" 
+              alt="CoYatri Logo" 
+              className="w-12 h-12 object-contain logo-img"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                const fallback = e.currentTarget.parentElement?.querySelector('.logo-fallback');
+                if (fallback) fallback.classList.remove('hidden');
+              }}
+            />
+            <div className="logo-fallback hidden w-10 h-10 bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/20 p-2">
+              <Train size={24} className="text-secondary" />
+            </div>
           </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-tight text-primary-dark leading-none">{t.title}</h1>
-            <p className="text-[10px] text-primary font-medium uppercase tracking-widest mt-1">Journeys Together</p>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-serif italic text-primary-dark leading-none tracking-tight">{t.title}</h1>
+            <p className="text-[9px] text-primary font-black uppercase tracking-[0.2em] mt-1 opacity-70">Journeys Together</p>
           </div>
         </div>
 
