@@ -180,7 +180,30 @@ const StatusBadge = ({ status }: { status: Status }) => {
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const handleFirestoreError = (error: any, operation: string, path: string) => {
+    const errInfo = {
+      error: error?.message || String(error),
+      operation,
+      path,
+      authInfo: {
+        userId: auth.currentUser?.uid,
+        email: auth.currentUser?.email,
+        emailVerified: auth.currentUser?.emailVerified,
+      }
+    };
+    console.error('Firestore Error: ', JSON.stringify(errInfo));
+  };
   const [activeTab, setActiveTab] = useState<'home' | 'guests' | 'layout' | 'alerts' | 'track'>('home');
+  const [language, setLanguage] = useState<'en' | 'hi' | 'te'>('en');
+
+  const translations = {
+    en: { title: 'Yatri', login: 'Login', track: 'Track Live Train', guests: 'Guest List', alerts: 'Alerts', layout: 'Layout', claim: 'Claim Profile', sendBroadcast: 'Send Broadcast', findYou: 'We Found You' },
+    hi: { title: 'यात्री', login: 'लॉगिन', track: 'ट्रेन ट्रैक करें', guests: 'अतिथि सूची', alerts: 'अलर्ट', layout: 'लेआउट', claim: 'दावा करें', sendBroadcast: 'प्रसारण भेजें', findYou: 'हमें आप मिल गए' },
+    te: { title: 'యాత్రి', login: 'లాగిన్', track: 'ట్రైన్ ట్రాక్', guests: 'అతిథుల జాబితా', alerts: 'అలర్ట్లు', layout: 'లేఅవుట్', claim: 'క్లెయిమ్ ప్రొఫైల్', sendBroadcast: 'బ్రాడ్‌కాస్ట్ పంపు', findYou: 'మేము మిమ్మల్ని కనుగొన్నాము' }
+  };
+
+  const t = translations[language];
   const [statuses, setStatuses] = useState<Record<string, PassengerStatus>>({});
   const [notifications, setNotifications] = useState<EventNotification[]>([]);
   const [guestMapping, setGuestMapping] = useState<GuestMapping | null>(null);
@@ -190,6 +213,9 @@ export default function App() {
   const [selectedCoach, setSelectedCoach] = useState<string | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<{ passenger: any; assignment: any } | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
+  const [notifForm, setNotifForm] = useState({ title: '', msg: '', type: 'info' as 'info' | 'warning' | 'success', journeyId: 'all' });
+  const [recommendedProfile, setRecommendedProfile] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Chat logic
@@ -210,15 +236,47 @@ export default function App() {
     }, 1000);
   };
 
-  // Helper for tracking URL
+  // Auto-alerts logic
+  useEffect(() => {
+    if (!isAdmin) return;
+    
+    const checkAlerts = () => {
+      const hours = new Date().getHours();
+      const minutes = new Date().getMinutes();
+      const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+      const alerts = [
+        { time: '06:00', title: 'Train Departure Warning', msg: 'Train 20707 departs in 20 minutes from Warangal Junction.', type: 'warning' },
+        { time: '11:00', title: 'Arrival Soon', msg: 'Vijayawada is arriving in 15 minutes. Prepare for disembarkation.', type: 'info' },
+        { time: '11:15', title: 'Ceremony Starting', msg: 'The wedding ceremony at Samyukta Vedika is starting in 30 minutes.', type: 'success' },
+        { time: '18:00', title: 'Return Journey', msg: 'Train 20708 departs Vijayawada in 20 minutes. Please reach the station.', type: 'warning' }
+      ];
+
+      const activeAlert = alerts.find(a => a.time === timeStr);
+      if (activeAlert) {
+        // Check if alert already sent today to avoid spam (simulation)
+        const sentAlerts = JSON.parse(localStorage.getItem('sent_alerts') || '[]');
+        const alertId = `${activeAlert.time}_${new Date().toDateString()}`;
+        
+        if (!sentAlerts.includes(alertId)) {
+          sendNotification(activeAlert.title, activeAlert.msg, activeAlert.type as any);
+          sentAlerts.push(alertId);
+          localStorage.setItem('sent_alerts', JSON.stringify(sentAlerts));
+        }
+      }
+    };
+
+    const interval = setInterval(checkAlerts, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [isAdmin]);
   const getTrackingUrl = () => {
     const hours = currentTime.getHours();
-    const trainNum = hours < 12 ? '12707' : '12708';
+    const trainNum = hours < 12 ? '20707' : '20708';
     return `https://www.railyatri.in/live-train-status/${trainNum}`;
   };
 
   const getActiveTrainNum = () => {
-    return currentTime.getHours() < 12 ? '12707' : '12708';
+    return currentTime.getHours() < 12 ? '20707' : '20708';
   };
 
   // Clock for progress
@@ -230,15 +288,29 @@ export default function App() {
     return onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
-        setIsAdmin(u.email === "sanjaykatkuri2004@gmail.com");
+        setIsAdmin(["sanjaykatkuri2004@gmail.com", "nithish0504@gmail.com"].includes(u.email || ""));
         // Load guest mapping
         const unsub = onSnapshot(doc(db, 'guestMappings', u.uid), (snap) => {
-          if (snap.exists()) setGuestMapping(snap.data() as GuestMapping);
+          if (snap.exists()) {
+            setGuestMapping(snap.data() as GuestMapping);
+            setRecommendedProfile(null);
+          } else {
+            // Recommendation logic
+            const displayName = u.displayName?.toLowerCase() || "";
+            const match = PASSENGER_DATA.passengers.find(p => 
+              displayName.includes(p.name.toLowerCase()) || 
+              p.name.toLowerCase().includes(displayName)
+            );
+            if (match) setRecommendedProfile(match);
+          }
+        }, (error) => {
+          handleFirestoreError(error, 'GET', `guestMappings/${u.uid}`);
         });
         return () => unsub();
       } else {
         setIsAdmin(false);
         setGuestMapping(null);
+        setRecommendedProfile(null);
       }
     });
   }, []);
@@ -252,6 +324,8 @@ export default function App() {
         newStatuses[doc.id] = doc.data() as PassengerStatus;
       });
       setStatuses(newStatuses);
+    }, (error) => {
+      handleFirestoreError(error, 'LIST', 'passengerStatuses');
     });
 
     const qNotif = query(collection(db, 'notifications'));
@@ -261,6 +335,8 @@ export default function App() {
         newNotifs.push({ id: doc.id, ...doc.data() } as EventNotification);
       });
       setNotifications(newNotifs.sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds));
+    }, (error) => {
+      handleFirestoreError(error, 'LIST', 'notifications');
     });
 
     return () => {
@@ -278,17 +354,52 @@ export default function App() {
 
     const qMappings = query(collection(db, 'guestMappings'));
     const unsubMappings = onSnapshot(qMappings, (snapshot) => {
-      const mappings: Record<string, any> = {};
+      const mappings: Record<string, GuestMapping> = {};
       snapshot.forEach((doc) => {
-        mappings[doc.id] = doc.data();
+        mappings[doc.id] = doc.data() as GuestMapping;
       });
       setAllGuestMappings(mappings);
     }, (error) => {
-      console.error("Guest mappings listener failed:", error);
+      handleFirestoreError(error, 'LIST', 'guestMappings');
     });
 
     return () => unsubMappings();
   }, [user, isAdmin]);
+
+  // Location Auto-Prompt
+  useEffect(() => {
+    const startLocationTracking = async () => {
+      if (!("geolocation" in navigator)) return;
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          if (auth.currentUser) {
+            const { latitude, longitude } = position.coords;
+            try {
+              await setDoc(doc(db, 'guestMappings', auth.currentUser.uid), {
+                lastLocation: {
+                  lat: latitude,
+                  lng: longitude,
+                  updatedAt: serverTimestamp()
+                }
+              }, { merge: true });
+            } catch (err) {
+              handleFirestoreError(err, 'WRITE', `guestMappings/${auth.currentUser.uid}`);
+            }
+          }
+        },
+        (error) => console.error("Location error:", error),
+        { enableHighAccuracy: true }
+      );
+    };
+
+    // Prompt immediately on mount
+    startLocationTracking();
+    
+    // Also track periodically
+    const interval = setInterval(startLocationTracking, 300000); // 5 mins
+    return () => clearInterval(interval);
+  }, [user]);
 
   const claimProfile = async (passengerId: string) => {
     if (!user) return;
@@ -318,14 +429,14 @@ export default function App() {
     }
   };
 
-  const sendNotification = async (title: string, message: string, type: 'info' | 'warning' | 'success') => {
+  const sendNotification = async (title: string, message: string, type: 'info' | 'warning' | 'success', journeyId: string = 'all') => {
     if (!isAdmin) return;
     try {
       await setDoc(doc(collection(db, 'notifications')), {
         title,
         message,
         type,
-        journeyId: selectedJourney,
+        journeyId,
         createdAt: serverTimestamp()
       });
     } catch (err) {
@@ -405,33 +516,56 @@ export default function App() {
     return { total, onboarded, leftOut };
   }, [filteredGuests, statuses, selectedJourney]);
 
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter(n => {
+      if (isAdmin) return true;
+      if (!n.journeyId || n.journeyId === 'all') return true;
+      if (guestMapping) {
+        return PASSENGER_DATA.assignments.some(a => a.passenger_id === guestMapping.passengerId && a.journey_id === n.journeyId);
+      }
+      return false;
+    });
+  }, [notifications, isAdmin, guestMapping]);
+
   return (
     <div className="min-h-screen bg-[#FDFCFB] text-[#2D2424] font-sans selection:bg-orange-100">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-orange-50 px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-200">
-            <Users size={20} />
+            <Train size={20} />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-orange-900 leading-none">Wedding Itinerary</h1>
+            <h1 className="text-sm font-bold tracking-tight text-orange-900 leading-none">{t.title}</h1>
             <p className="text-[10px] text-orange-600/70 font-medium uppercase tracking-widest mt-1">S & Y • 2026</p>
           </div>
         </div>
-        
-        {user ? (
-          <div className="flex items-center gap-2">
-            <img src={user.photoURL || ''} alt="avatar" className="w-8 h-8 rounded-full border border-orange-100" />
-            <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-              <LogOut size={18} />
+
+        <div className="flex items-center gap-3">
+          <select 
+            value={language} 
+            onChange={(e) => setLanguage(e.target.value as any)}
+            className="text-[10px] font-bold bg-gray-50 border-none rounded-lg px-2 py-1 outline-none text-orange-600 cursor-pointer"
+          >
+            <option value="en">EN</option>
+            <option value="hi">हिन्दी</option>
+            <option value="te">తెలుగు</option>
+          </select>
+          
+          {user ? (
+            <div className="flex items-center gap-2">
+              <img src={user.photoURL || ''} alt="avatar" className="w-8 h-8 rounded-full border border-orange-100" />
+              <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                <LogOut size={18} />
+              </button>
+            </div>
+          ) : (
+            <button onClick={handleLogin} className="flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-full text-xs font-semibold hover:bg-orange-100 transition-all border border-orange-100 shadow-sm active:scale-95">
+              <LogIn size={16} />
+              <span>{t.login}</span>
             </button>
-          </div>
-        ) : (
-          <button onClick={handleLogin} className="flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-full text-xs font-semibold hover:bg-orange-100 transition-all border border-orange-100 shadow-sm active:scale-95">
-            <LogIn size={16} />
-            <span>Admin</span>
-          </button>
-        )}
+          )}
+        </div>
       </header>
 
       {/* Hero Section */}
@@ -503,7 +637,7 @@ export default function App() {
                 onClick={() => setActiveTab('track')}
                 className="w-full py-3 bg-[#1A1A1A] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all"
               >
-                <Train size={14} className="text-orange-500" /> Track Live Train
+                <Train size={14} className="text-orange-500" /> {t.track}
               </button>
             </div>
               <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/50 space-y-4">
@@ -581,6 +715,31 @@ export default function App() {
                   <div className="space-y-3">
                     <p className="text-[10px] text-white/60 leading-relaxed italic">Identify yourself from the passenger list to access your personalized itinerary.</p>
                     <button onClick={() => setActiveTab('guests')} className="w-full py-2 bg-orange-600 text-white rounded-xl text-xs font-black shadow-lg">SELECT YOUR NAME</button>
+                    
+                    {recommendedProfile && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mt-4 p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+                            {recommendedProfile.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest leading-none mb-1">We Found You</p>
+                            <p className="text-sm font-bold text-white mb-0.5">{recommendedProfile.name}</p>
+                            <p className="text-[9px] text-white/40">{recommendedProfile.id}</p>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => claimProfile(recommendedProfile.id)}
+                          className="bg-white text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-orange-50 transition-colors"
+                        >
+                          {t.claim}
+                        </button>
+                      </motion.div>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -957,11 +1116,7 @@ export default function App() {
               <h3 className="text-2xl font-serif italic text-gray-900">Alerts & Broadcasts</h3>
               {isAdmin && (
                 <button 
-                  onClick={() => {
-                    const title = prompt("Alert Title:");
-                    const msg = prompt("Alert Message:");
-                    if (title && msg) sendNotification(title, msg, "info");
-                  }}
+                  onClick={() => setIsNotifModalOpen(true)}
                   className="bg-orange-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-orange-200"
                 >
                   Send Broadcast
@@ -970,13 +1125,13 @@ export default function App() {
             </div>
 
             <div className="space-y-4">
-              {notifications.length === 0 ? (
+              {filteredNotifications.length === 0 ? (
                 <div className="p-12 text-center bg-gray-50 rounded-[40px] border-2 border-dashed border-gray-100">
                   <Info className="mx-auto text-gray-200 mb-4" size={40} />
                   <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">No active announcements</p>
                 </div>
               ) : (
-                notifications.map(n => (
+                filteredNotifications.map(n => (
                   <motion.div 
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -984,7 +1139,14 @@ export default function App() {
                     className={`p-6 rounded-[32px] border ${n.type === 'warning' ? 'bg-red-50 border-red-100 text-red-900' : 'bg-white border-gray-100 shadow-sm shadow-orange-50'}`}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="text-sm font-black uppercase tracking-tight">{n.title}</h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-black uppercase tracking-tight">{n.title}</h4>
+                        {n.journeyId !== 'all' && (
+                          <span className="text-[8px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black uppercase">
+                            {n.journeyId === 'J1' ? 'Vijayawada Bound' : 'Warangal Bound'}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[10px] font-bold text-gray-400">
                         {n.createdAt?.toDate ? n.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'}
                       </span>
@@ -1231,21 +1393,21 @@ export default function App() {
           className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'guests' ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
         >
           <Users size={20} />
-          <span className="text-[9px] font-bold uppercase tracking-tighter">Guest List</span>
+          <span className="text-[9px] font-bold uppercase tracking-tighter">{t.guests}</span>
         </button>
         <button 
           onClick={() => setActiveTab('layout')}
           className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'layout' ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
         >
           <Train size={20} />
-          <span className="text-[9px] font-bold uppercase tracking-tighter">Layout</span>
+          <span className="text-[9px] font-bold uppercase tracking-tighter">{t.layout}</span>
         </button>
         <button 
           onClick={() => setActiveTab('track')}
           className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'track' ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
         >
           <MapPin size={20} />
-          <span className="text-[9px] font-bold uppercase tracking-tighter">Track</span>
+          <span className="text-[9px] font-bold uppercase tracking-tighter">{t.track.split(' ')[0]}</span>
         </button>
         <button 
           onClick={() => setActiveTab('alerts')}
@@ -1262,12 +1424,92 @@ export default function App() {
             )}
           </AnimatePresence>
           <Info size={20} />
-          <span className="text-[9px] font-bold uppercase tracking-tighter">Alerts</span>
+          <span className="text-[9px] font-bold uppercase tracking-tighter">{t.alerts}</span>
         </button>
       </nav>
 
       {/* Spacing for nav */}
       <div className="h-28" />
+
+      {/* Admin Broadcast Modal */}
+      <AnimatePresence>
+        {isNotifModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white w-full max-w-sm rounded-[40px] overflow-hidden shadow-2xl"
+            >
+              <div className="bg-orange-600 p-6 flex justify-between items-center text-white">
+                <h3 className="text-xl font-serif italic text-white">New Broadcast</h3>
+                <button onClick={() => setIsNotifModalOpen(false)} className="hover:rotate-90 transition-transform">
+                  <X />
+                </button>
+              </div>
+              <div className="p-8 space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400">Target Journey</label>
+                  <select 
+                    value={notifForm.journeyId}
+                    onChange={e => setNotifForm({...notifForm, journeyId: e.target.value})}
+                    className="w-full bg-gray-50 border-none rounded-xl text-xs font-bold p-3 outline-none ring-1 ring-gray-100"
+                  >
+                    <option value="all">Everyone</option>
+                    <option value="J1">To Vijayawada (20707)</option>
+                    <option value="J2">To Warangal (20708)</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400">Alert Type</label>
+                  <select 
+                    value={notifForm.type}
+                    onChange={e => setNotifForm({...notifForm, type: e.target.value as any})}
+                    className="w-full bg-gray-50 border-none rounded-xl text-xs font-bold p-3 outline-none ring-1 ring-gray-100"
+                  >
+                    <option value="info">Information (Blue)</option>
+                    <option value="warning">Warning (Red)</option>
+                    <option value="success">Success (Green)</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400">Title</label>
+                  <input 
+                    type="text" 
+                    value={notifForm.title}
+                    onChange={e => setNotifForm({...notifForm, title: e.target.value})}
+                    placeholder="e.g. Lunch served" 
+                    className="w-full bg-gray-50 border-none rounded-xl text-xs font-bold p-3 outline-none ring-1 ring-gray-100" 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400">Message</label>
+                  <textarea 
+                    rows={3} 
+                    value={notifForm.msg}
+                    onChange={e => setNotifForm({...notifForm, msg: e.target.value})}
+                    placeholder="Write your message..." 
+                    className="w-full bg-gray-50 border-none rounded-xl text-xs font-bold p-3 resize-none outline-none ring-1 ring-gray-100"
+                  />
+                </div>
+                <button 
+                  onClick={async () => {
+                    if (notifForm.title && notifForm.msg) {
+                      await sendNotification(notifForm.title, notifForm.msg, notifForm.type, notifForm.journeyId);
+                      setNotifForm({ title: '', msg: '', type: 'info', journeyId: 'all' });
+                      setIsNotifModalOpen(false);
+                      alert("Broadcast sent successfully!");
+                    }
+                  }}
+                  className="w-full py-4 bg-orange-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-200 active:scale-95 transition-all"
+                >
+                  SEND NOTIFICATION
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
