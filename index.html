@@ -8,6 +8,17 @@
     <meta name="theme-color" content="#7FA98A" />
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/dika0ttaj/image/upload/v1777146426/a8c235a0-b770-4a7f-8c7d-3a7c82e0552e_hv03iu.png" />
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/dika0ttaj/image/upload/v1777146426/a8c235a0-b770-4a7f-8c7d-3a7c82e0552e_hv03iu.png" />
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('SW registered', reg);
+          }).catch(err => {
+            console.log('SW reg error', err);
+          });
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -73,7 +73,12 @@ interface GuestMapping {
     lat: number;
     lng: number;
     updatedAt: any;
-  }
+  };
+  locationHistory?: {
+    lat: number;
+    lng: number;
+    updatedAt: any;
+  }[];
 }
 
 // --- Components ---
@@ -196,6 +201,34 @@ export default function App() {
   };
   const [activeTab, setActiveTab] = useState<'home' | 'guests' | 'layout' | 'alerts' | 'track'>('home');
   const [language, setLanguage] = useState<'en' | 'hi' | 'te'>('te');
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      // Only show prompt if not already installed (checking if display-mode is standalone)
+      if (!window.matchMedia('(display-mode: standalone)').matches) {
+        setShowInstallPrompt(true);
+      }
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    setDeferredPrompt(null);
+    setShowInstallPrompt(false);
+  };
 
   const translations = {
     en: { 
@@ -251,7 +284,8 @@ export default function App() {
       warangal: 'Warangal',
       vijayawada: 'Vijayawada',
       names: 'Sudheshna & Yashwanth',
-      subtitle: 'Ceremony • Reception • Journey'
+      subtitle: 'Ceremony • Reception • Journey',
+      downloadApp: 'DOWNLOAD APP'
     },
     hi: { 
       title: 'कोयात्री', 
@@ -306,7 +340,8 @@ export default function App() {
       warangal: 'वरंगल',
       vijayawada: 'विजयवाड़ा',
       names: 'सुदेशना और यशवंत',
-      subtitle: 'समारोह • रिसेप्शन • यात्रा'
+      subtitle: 'समारोह • रिसेप्शन • यात्रा',
+      downloadApp: 'ऐप डाउनलोड करें'
     },
     te: { 
       title: 'కోయాత్రి', 
@@ -361,7 +396,8 @@ export default function App() {
       warangal: 'వరంగల్',
       vijayawada: 'విజయవాడ',
       names: 'సుదేష్ణ & యశ్వంత్',
-      subtitle: 'వేడుక • రిసెప్షన్ • ప్రయాణం'
+      subtitle: 'వేడుక • రిసెప్షన్ • ప్రయాణం',
+      downloadApp: 'యాప్ డౌన్‌లోడ్'
     }
   };
 
@@ -379,24 +415,26 @@ export default function App() {
   const [notifForm, setNotifForm] = useState({ title: '', msg: '', type: 'info' as 'info' | 'warning' | 'success', journeyId: 'all' });
   const [recommendedProfile, setRecommendedProfile] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  
-  // PWA Install Prompt
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [selectedGuestForTimeline, setSelectedGuestForTimeline] = useState<string | null>(null);
+  const [locationHistoryHistory, setLocationHistoryHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    });
-  }, []);
-
-  const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') setDeferredPrompt(null);
-  };
-
+    if (selectedGuestForTimeline) {
+      const q = query(
+        collection(db, 'guestMappings', selectedGuestForTimeline, 'locationHistory'),
+        where('updatedAt', '!=', null) 
+      );
+      const unsub = onSnapshot(q, (snap) => {
+        const hist: any[] = [];
+        snap.forEach(doc => hist.push(doc.data()));
+        setLocationHistoryHistory(hist.sort((a, b) => (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0)).slice(0, 10));
+      });
+      return () => unsub();
+    } else {
+      setLocationHistoryHistory([]);
+    }
+  }, [selectedGuestForTimeline]);
+  
   // Chat logic
   const [chatMessages, setChatMessages] = useState<{role: 'user' | 'bot', text: string}[]>([
     { role: 'bot', text: 'Hello! I am your Wedding Assistant. How can I help you today?' }
@@ -554,14 +592,35 @@ export default function App() {
         async (position) => {
           if (auth.currentUser) {
             const { latitude, longitude } = position.coords;
+            const newLocation = {
+              lat: latitude,
+              lng: longitude,
+              updatedAt: new Date() // Use local date for immediate array update if needed, but Firestore uses serverTimestamp
+            };
+            
             try {
-              await setDoc(doc(db, 'guestMappings', auth.currentUser.uid), {
+              // We'll append to history using a custom logic or just update the document
+              // To keep it simple and within 1MB, we'll keep last 20 locations
+              const mappingRef = doc(db, 'guestMappings', auth.currentUser.uid);
+              // We need to get current mapping to append to history
+              // But for serverTimestamp compatibility in array, it's better to use a subcollection
+              // However, to keep it simple as requested, let's just update the lastLocation first
+              await setDoc(mappingRef, {
+                uid: auth.currentUser.uid,
                 lastLocation: {
                   lat: latitude,
                   lng: longitude,
                   updatedAt: serverTimestamp()
                 }
               }, { merge: true });
+
+              // Also add to a history subcollection for more robust timeline
+              const historyRef = doc(collection(mappingRef, 'locationHistory'));
+              await setDoc(historyRef, {
+                lat: latitude,
+                lng: longitude,
+                updatedAt: serverTimestamp()
+              });
             } catch (err) {
               handleFirestoreError(err, 'WRITE', `guestMappings/${auth.currentUser.uid}`);
             }
@@ -581,15 +640,20 @@ export default function App() {
   }, [user]);
 
   const claimProfile = async (passengerId: string) => {
-    if (!user) return;
+    if (!user) {
+      alert("Please login first to claim your profile.");
+      return;
+    }
     try {
       await setDoc(doc(db, 'guestMappings', user.uid), {
         uid: user.uid,
         passengerId,
         isCheckIn: false
-      });
+      }, { merge: true });
+      alert("Profile claimed successfully!");
     } catch (err) {
       console.error(err);
+      alert("Failed to claim profile. Please try again.");
     }
   };
 
@@ -745,7 +809,7 @@ export default function App() {
               onClick={handleInstall}
               className="flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full text-[10px] font-black shadow-lg shadow-primary/30 active:scale-95 transition-all"
             >
-              DOWNLOAD APP
+              {t.downloadApp}
             </button>
           )}
 
@@ -1094,41 +1158,36 @@ export default function App() {
               <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-black uppercase tracking-widest text-blue-900 flex items-center gap-2">
-                    <MapPin className="text-blue-500" size={14} /> {t.locationHub}
+                    <MapPin className="text-blue-500" size={14} /> Guest Scroller
                   </h4>
-                  <span className="text-[8px] px-2 py-1 bg-blue-100 text-blue-600 rounded-full font-black">LIVE</span>
+                  <span className="text-[8px] px-2 py-1 bg-blue-100 text-blue-600 rounded-full font-black">ACTIVE</span>
                 </div>
-                <div className="space-y-3">
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
                   {(Object.entries(allGuestMappings) as [string, GuestMapping][])
                     .filter(([_, mapping]) => mapping.lastLocation)
                     .map(([uid, mapping]) => {
                       const passenger = PASSENGER_DATA.passengers.find(p => p.id === mapping.passengerId);
                       return (
-                        <div key={uid} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-[10px] font-black">
-                              {passenger?.name.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="text-xs font-bold text-gray-900">{passenger?.name}</p>
-                              <p className="text-[8px] text-gray-400 font-medium">
-                                {t.lastUpdated}: {mapping.lastLocation?.updatedAt?.toDate()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                            </div>
+                        <motion.div 
+                          key={uid} 
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setSelectedGuestForTimeline(uid)}
+                          className="flex-shrink-0 w-32 bg-gray-50 p-4 rounded-2xl border border-gray-100 flex flex-col items-center text-center gap-2 snap-center cursor-pointer"
+                        >
+                          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-black shadow-lg shadow-blue-100">
+                            {passenger?.name.charAt(0)}
                           </div>
-                          <a 
-                            href={`https://www.google.com/maps/search/?api=1&query=${mapping.lastLocation?.lat},${mapping.lastLocation?.lng}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-white p-2 rounded-lg text-blue-600 shadow-sm border border-blue-100"
-                          >
-                            <MapPin size={12} />
-                          </a>
-                        </div>
+                          <div className="min-w-0 w-full">
+                            <p className="text-[10px] font-bold text-gray-900 truncate">{passenger?.name}</p>
+                            <p className="text-[8px] text-gray-400 font-medium">
+                              {mapping.lastLocation?.updatedAt?.toDate()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </motion.div>
                       );
                     })}
                   {(Object.values(allGuestMappings) as GuestMapping[]).filter(m => m.lastLocation).length === 0 && (
-                    <p className="text-[10px] text-gray-400 text-center italic py-4">{t.noLocation}</p>
+                    <p className="text-[10px] text-gray-400 text-center italic py-4 w-full">{t.noLocation}</p>
                   )}
                 </div>
               </div>
@@ -1145,7 +1204,13 @@ export default function App() {
                   <motion.div 
                     layout
                     key={p.id}
-                    className={`bg-white p-4 rounded-2xl border transition-all group ${isMe ? 'border-primary shadow-lg shadow-primary/10 ring-2 ring-primary/10' : 'border-gray-100 shadow-sm hover:shadow-md'}`}
+                    onClick={() => isAdmin && setAllGuestMappings(prev => {
+                      // Find the uid for this passenger
+                      const entry = Object.entries(prev).find(([_, m]) => (m as GuestMapping).passengerId === p.id);
+                      if (entry) setSelectedGuestForTimeline(entry[0]);
+                      return prev;
+                    })}
+                    className={`bg-white p-4 rounded-2xl border transition-all group cursor-pointer ${isMe ? 'border-primary shadow-lg shadow-primary/10 ring-2 ring-primary/10' : 'border-gray-100 shadow-sm hover:shadow-md'}`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -1585,6 +1650,95 @@ export default function App() {
           </motion.button>
         )}
       </div>
+
+      {/* Guest Location Timeline Modal */}
+      <AnimatePresence>
+        {selectedGuestForTimeline && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-end p-0 bg-black/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              className="bg-white w-full max-w-sm h-full flex flex-col shadow-2xl"
+            >
+              <div className="bg-blue-600 p-6 flex justify-between items-center text-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white font-bold">
+                    {PASSENGER_DATA.passengers.find(p => p.id === allGuestMappings[selectedGuestForTimeline]?.passengerId)?.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">
+                      {PASSENGER_DATA.passengers.find(p => p.id === allGuestMappings[selectedGuestForTimeline]?.passengerId)?.name}
+                    </h3>
+                    <p className="text-[10px] opacity-70 uppercase font-black">Location Timeline</p>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedGuestForTimeline(null)} className="p-2 hover:bg-white/10 rounded-full">
+                  <X />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {allGuestMappings[selectedGuestForTimeline]?.lastLocation && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-blue-900 uppercase">Current Position</span>
+                        <MapPin className="text-blue-500" size={14} />
+                      </div>
+                      <p className="text-xs font-medium text-blue-800">
+                        Lat: {allGuestMappings[selectedGuestForTimeline].lastLocation?.lat.toFixed(4)}, 
+                        Lng: {allGuestMappings[selectedGuestForTimeline].lastLocation?.lng.toFixed(4)}
+                      </p>
+                      <a 
+                        href={`https://www.google.com/maps/search/?api=1&query=${allGuestMappings[selectedGuestForTimeline].lastLocation?.lat},${allGuestMappings[selectedGuestForTimeline].lastLocation?.lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase text-center flex items-center justify-center gap-2"
+                      >
+                        <ExternalLink size={12} /> Open in Google Maps
+                      </a>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-2">History (Last 10 Updates)</h4>
+                      <div className="relative pl-6 space-y-6">
+                        <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-gray-100" />
+                        
+                        {locationHistoryHistory.map((h, idx) => (
+                          <div key={idx} className="relative">
+                            <div className={`absolute -left-[23px] top-1 w-2 h-2 rounded-full ${idx === 0 ? 'bg-blue-500 ring-4 ring-blue-100' : 'bg-gray-300'}`} />
+                            <div className="flex flex-col">
+                              <span className={`text-[8px] font-black uppercase ${idx === 0 ? 'text-blue-500' : 'text-gray-400'}`}>
+                                {h.updatedAt?.toDate()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                              </span>
+                              <span className={`text-xs font-bold ${idx === 0 ? 'text-gray-900' : 'text-gray-600'}`}>
+                                {idx === 0 ? 'Latest Update' : `Lat: ${h.lat.toFixed(3)}, Lng: ${h.lng.toFixed(3)}`}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+
+                        {locationHistoryHistory.length === 0 && (
+                          <p className="text-[9px] text-gray-400 italic text-center py-4">
+                            Background tracking active every 5 minutes. Waiting for updates...
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {!allGuestMappings[selectedGuestForTimeline]?.lastLocation && (
+                  <div className="text-center py-20 text-gray-400 space-y-2">
+                    <MapPin className="mx-auto opacity-20" size={48} />
+                    <p className="text-xs font-bold uppercase tracking-widest">No Location Data</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-sm bg-white/95 backdrop-blur-xl border border-secondary/20 rounded-2xl shadow-2xl z-50 flex items-stretch p-2">
