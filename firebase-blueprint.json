@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "PassengerStatus": {
+      "title": "Passenger Onboarding Status",
+      "description": "Tracks the real-time status of a passenger for a specific journey.",
+      "type": "object",
+      "properties": {
+        "passengerId": { "type": "string", "description": "Unique ID of the passenger" },
+        "journeyId": { "type": "string", "description": "ID of the journey (J1 or J2)" },
+        "status": { 
+          "type": "string", 
+          "enum": ["pending", "onboarded", "left-out", "present", "coming"],
+          "description": "Current status of the passenger" 
+        },
+        "updatedBy": { "type": "string", "description": "UID of the user who updated the status" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp of the last update" }
+      },
+      "required": ["passengerId", "journeyId", "status", "updatedAt"]
+    },
+    "Admin": {
+      "title": "Admin User",
+      "description": "Users with permission to manage statuses and send alerts.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Notification": {
+      "title": "Event Alert",
+      "description": "Alerts sent by administrators to all guests.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "journeyId": { "type": "string", "description": "Target journey (all, J1, or J2)" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["info", "warning", "success"] }
+      },
+      "required": ["title", "message", "createdAt"]
+    },
+    "GuestSelfInfo": {
+      "title": "Guest Identity Mapping",
+      "description": "Maps a Firebase UID to a passenger ID from the dataset.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "passengerId": { "type": "string" },
+        "isCheckIn": { "type": "boolean" }
+      },
+      "required": ["uid", "passengerId"]
+    }
+  },
+  "firestore": {
+    "passengerStatuses/{statusId}": {
+      "schema": "PassengerStatus",
+      "description": "Real-time onboarding status."
+    },
+    "admins/{adminUid}": {
+      "schema": "Admin",
+      "description": "Administrators."
+    },
+    "notifications/{notifId}": {
+      "schema": "Notification",
+      "description": "Broadcast alerts."
+    },
+    "guestMappings/{uid}": {
+      "schema": "GuestSelfInfo",
+      "description": "UID to Passenger context."
+    }
+  }
+}
