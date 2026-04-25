@@ -122,15 +122,15 @@ const SeatLayout = ({
   }, [coachName, journeyId, passengerAssignments, passengerStatuses, isExecutive, rows, cols]);
 
   return (
-    <div className="bg-white p-4 rounded-3xl border border-orange-50 shadow-inner overflow-x-auto">
+    <div className="bg-white p-4 rounded-3xl border border-secondary/20 shadow-inner overflow-x-auto">
       <div className="min-w-[400px]">
         <div className="flex justify-between items-center mb-6 px-2">
           <h5 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-            <Train size={14} className="text-orange-500" /> Coach {coachName}
+            <Train size={14} className="text-primary" /> Coach {coachName}
           </h5>
           <div className="flex gap-4">
             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-md bg-green-600" /><span className="text-[10px] font-bold text-gray-500 uppercase">Boarded</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-md bg-orange-100" /><span className="text-[10px] font-bold text-gray-500 uppercase">Pending</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-md bg-surface border border-secondary/20" /><span className="text-[10px] font-bold text-gray-500 uppercase">Pending</span></div>
           </div>
         </div>
         <div className="space-y-3">
@@ -146,7 +146,7 @@ const SeatLayout = ({
                       w-12 h-12 rounded-xl flex items-center justify-center text-[11px] font-black transition-all border-2
                       ${!s.passenger ? 'bg-gray-50/50 text-gray-200 border-gray-100/50 cursor-default' : 
                         s.status === 'onboarded' ? 'bg-green-600 text-white border-green-700 shadow-lg shadow-green-100' : 
-                        'bg-white text-orange-700 border-orange-100 shadow-sm'}
+                        'bg-white text-primary-dark border-secondary/20 shadow-sm'}
                     `}
                   >
                     {s.seatNum}
@@ -198,9 +198,171 @@ export default function App() {
   const [language, setLanguage] = useState<'en' | 'hi' | 'te'>('en');
 
   const translations = {
-    en: { title: 'Yatri', login: 'Login', track: 'Track Live Train', guests: 'Guest List', alerts: 'Alerts', layout: 'Layout', claim: 'Claim Profile', sendBroadcast: 'Send Broadcast', findYou: 'We Found You' },
-    hi: { title: 'यात्री', login: 'लॉगिन', track: 'ट्रेन ट्रैक करें', guests: 'अतिथि सूची', alerts: 'अलर्ट', layout: 'लेआउट', claim: 'दावा करें', sendBroadcast: 'प्रसारण भेजें', findYou: 'हमें आप मिल गए' },
-    te: { title: 'యాత్రి', login: 'లాగిన్', track: 'ట్రైన్ ట్రాక్', guests: 'అతిథుల జాబితా', alerts: 'అలర్ట్లు', layout: 'లేఅవుట్', claim: 'క్లెయిమ్ ప్రొఫైల్', sendBroadcast: 'బ్రాడ్‌కాస్ట్ పంపు', findYou: 'మేము మిమ్మల్ని కనుగొన్నాము' }
+    en: { 
+      title: 'CoYatri', 
+      login: 'Login', 
+      track: 'Track Live Train', 
+      guests: 'Guest List', 
+      alerts: 'Alerts', 
+      layout: 'Layout', 
+      claim: 'Claim Profile', 
+      sendBroadcast: 'Send Broadcast', 
+      findYou: 'We Found You',
+      searchPlaceholder: 'Search by Name, Coach, Seat...',
+      total: 'Total',
+      onboarded: 'Onboarded',
+      left: 'Left',
+      locationHub: 'Guest Location Hub',
+      noLocation: 'No guests sharing location yet',
+      you: 'You',
+      checkSeat: 'CHECK SEAT',
+      thisIsMe: 'This is me',
+      lastUpdated: 'Last updated',
+      toVijayawada: 'To Vijayawada',
+      toWarangal: 'To Warangal',
+      coachHierarchy: 'Coach Hierarchy',
+      selectCoach: 'Select Coach',
+      chooseCoach: 'Choose a highlighted coach to visualize seating',
+      alertsAndBroadcasts: 'Alerts & Broadcasts',
+      noAnnouncements: 'No active announcements',
+      askAnything: 'Ask me anything...',
+      trainTrack: 'Train Track',
+      coachMap: 'Coach Map',
+      vijayawadaBound: 'Vijayawada Bound',
+      warangalBound: 'Warangal Bound',
+      eventItinerary: 'Event Itinerary',
+      liveProgress: 'Live Progress',
+      marriageCeremony: 'Marriage Ceremony',
+      reception: 'Reception',
+      guestPortal: 'Guest Portal',
+      verifiedIdentity: 'Verified Identity',
+      actionRequired: 'Action Required',
+      loginPrompt: 'Login to claim your seat and receive alerts.',
+      continueGoogle: 'CONTINUE WITH GOOGLE',
+      identifyPrompt: 'Identify yourself from the passenger list to access your personalized itinerary.',
+      selectName: 'SELECT YOUR NAME',
+      assignedTo: 'Assigned To',
+      seat: 'Seat',
+      vandeBharat: 'Vande Bharat Express',
+      itinerary_step1: 'Train Departs Warangal',
+      itinerary_step2: 'Wedding Ceremony',
+      itinerary_step3: 'Train Departs Vijayawada',
+      itinerary_step4: 'Dinner Reception',
+      warangal: 'Warangal',
+      vijayawada: 'Vijayawada',
+      names: 'Sudheshna & Yashwanth',
+      subtitle: 'Ceremony • Reception • Journey'
+    },
+    hi: { 
+      title: 'कोयात्री', 
+      login: 'लॉगिन', 
+      track: 'ट्रेन ट्रैक करें', 
+      guests: 'अतिथि सूची', 
+      alerts: 'अलर्ट', 
+      layout: 'लेआउट', 
+      claim: 'दावा करें', 
+      sendBroadcast: 'प्रसारण भेजें', 
+      findYou: 'हमें आप मिल गए',
+      searchPlaceholder: 'नाम, कोच, सीट द्वारा खोजें...',
+      total: 'कुल',
+      onboarded: 'सवार',
+      left: 'बाकी',
+      locationHub: 'अतिथि स्थान केंद्र',
+      noLocation: 'अभी तक कोई अतिथि स्थान साझा नहीं कर रहा है',
+      you: 'आप',
+      checkSeat: 'सीट की जाँच करें',
+      thisIsMe: 'यह मैं हूँ',
+      lastUpdated: 'पिछला अपडेट',
+      toVijayawada: 'विजयवाड़ा के लिए',
+      toWarangal: 'वरंगल के लिए',
+      coachHierarchy: 'कोच पदानुक्रम',
+      selectCoach: 'कोच चुनें',
+      chooseCoach: 'सीटिंग देखने के लिए हाइलाइट किए गए कोच को चुनें',
+      alertsAndBroadcasts: 'अलर्ट और प्रसारण',
+      noAnnouncements: 'कोई सक्रिय घोषणा नहीं',
+      askAnything: 'मुझसे कुछ भी पूछें...',
+      trainTrack: 'ट्रेन ट्रैक',
+      coachMap: 'कोच मैप',
+      vijayawadaBound: 'विजयवाड़ा की ओर',
+      warangalBound: 'वरंगल की ओर',
+      eventItinerary: 'ईवेंट यात्रा कार्यक्रम',
+      liveProgress: 'लाइव प्रगति',
+      marriageCeremony: 'विवाह समारोह',
+      reception: 'रिसेप्शन',
+      guestPortal: 'अतिथि पोर्टल',
+      verifiedIdentity: 'सत्यापित पहचान',
+      actionRequired: 'कार्रवाई आवश्यक',
+      loginPrompt: 'अपनी सीट का दावा करने और अलर्ट प्राप्त करने के लिए लॉगिन करें।',
+      continueGoogle: 'गूगल के साथ जारी रखें',
+      identifyPrompt: 'व्यक्तिगत यात्रा कार्यक्रम देखने के लिए यात्री सूची से अपनी पहचान करें।',
+      selectName: 'अपना नाम चुनें',
+      assignedTo: 'को सौंपा गया',
+      seat: 'सीट',
+      vandeBharat: 'वंदे भारत एक्सप्रेस',
+      itinerary_step1: 'वरंगल से प्रस्थान',
+      itinerary_step2: 'शादी समारोह',
+      itinerary_step3: 'विजयवाड़ा से प्रस्थान',
+      itinerary_step4: 'रात्रिभोज स्वागत',
+      warangal: 'वरंगल',
+      vijayawada: 'विजयवाड़ा',
+      names: 'सुदेशना और यशवंत',
+      subtitle: 'समारोह • रिसेप्शन • यात्रा'
+    },
+    te: { 
+      title: 'కోయాత్రి', 
+      login: 'లాగిన్', 
+      track: 'ట్రైన్ ట్రాక్', 
+      guests: 'అతిథుల జాబితా', 
+      alerts: 'అలర్ట్లు', 
+      layout: 'లేఅవుట్', 
+      claim: 'క్లెయిమ్ ప్రొఫైల్', 
+      sendBroadcast: 'బ్రాడ్‌కాస్ట్ పంపు', 
+      findYou: 'మేము మిమ్మల్ని కనుగొన్నాము',
+      searchPlaceholder: 'పేరు, కోచ్, సీటు ద్వారా వెతకండి...',
+      total: 'మొత్తం',
+      onboarded: 'ఎక్కినవారు',
+      left: 'మిగిలినవారు',
+      locationHub: 'అతిథి స్థాన కేంద్రం',
+      noLocation: 'అతిథులు ఇంకా స్థానాన్ని పంచుకోవడం లేదు',
+      you: 'మీరు',
+      checkSeat: 'సీటు తనిఖీ చేయండి',
+      thisIsMe: 'ఇది నేనే',
+      lastUpdated: 'చివరిగా అప్‌డేట్ చేయబడింది',
+      toVijayawada: 'విజయవాడకు',
+      toWarangal: 'వరంగల్‌కు',
+      coachHierarchy: 'కోచ్ క్రమశ్రేణి',
+      selectCoach: 'కోచ్ ఎంచుకోండి',
+      chooseCoach: 'సీటింగ్ చూడటానికి హైలైట్ చేసిన కోచ్‌ను ఎంచుకోండి',
+      alertsAndBroadcasts: 'అలర్ట్లు & బ్రాడ్‌కాస్ట్లు',
+      noAnnouncements: 'ప్రకటనలు ఏవీ లేవు',
+      askAnything: 'నన్ను ఏదైనా అడగండి...',
+      trainTrack: 'ట్రైన్ ట్రాక్',
+      coachMap: 'కోచ్ మ్యాప్',
+      vijayawadaBound: 'విజయవాడ వైపు',
+      warangalBound: 'వరంగల్ వైపు',
+      eventItinerary: 'ఈవెంట్ విధివిధానం',
+      liveProgress: 'లైవ్ ప్రోగ్రెస్',
+      marriageCeremony: 'వివాహ వేడుక',
+      reception: 'రిసెప్షన్',
+      guestPortal: 'గెస్ట్ పోర్టల్',
+      verifiedIdentity: 'ధృవీకరించబడిన గుర్తింపు',
+      actionRequired: 'చర్య అవసరం',
+      loginPrompt: 'మీ సీటును క్లెయిమ్ చేయడానికి మరియు అలర్ట్‌లను స్వీకరించడానికి లాగిన్ చేయండి.',
+      continueGoogle: 'గూగుల్‌తో కొనసాగండి',
+      identifyPrompt: 'వ్యక్తిగతీకరించిన ప్రయాణ ప్రణాళికను యాక్సెస్ చేయడానికి ప్రయాణికుల జాబితా నుండి మిమ్మల్ని మీరు గుర్తించుకోండి.',
+      selectName: 'మీ పేరును ఎంచుకోండి',
+      assignedTo: 'కేటాయించబడింది',
+      seat: 'సీటు',
+      vandeBharat: 'వందే భారత్ ఎక్స్‌ప్రెస్',
+      itinerary_step1: 'వరంగల్ నుండి ట్రైన్ ప్రారంభం',
+      itinerary_step2: 'వివాహ వేడుక',
+      itinerary_step3: 'విజయవాడ నుండి ట్రైన్ ప్రారంభం',
+      itinerary_step4: 'డిన్నర్ రిసెప్షన్',
+      warangal: 'వరంగల్',
+      vijayawada: 'విజయవాడ',
+      names: 'సుదేష్ణ & యశ్వంత్',
+      subtitle: 'వేడుక • రిసెప్షన్ • ప్రయాణం'
+    }
   };
 
   const t = translations[language];
@@ -217,6 +379,23 @@ export default function App() {
   const [notifForm, setNotifForm] = useState({ title: '', msg: '', type: 'info' as 'info' | 'warning' | 'success', journeyId: 'all' });
   const [recommendedProfile, setRecommendedProfile] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // PWA Install Prompt
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    });
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') setDeferredPrompt(null);
+  };
 
   // Chat logic
   const [chatMessages, setChatMessages] = useState<{role: 'user' | 'bot', text: string}[]>([
@@ -528,24 +707,33 @@ export default function App() {
   }, [notifications, isAdmin, guestMapping]);
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] text-[#2D2424] font-sans selection:bg-orange-100">
+    <div className="min-h-screen bg-background text-dark font-sans selection:bg-secondary/30">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-orange-50 px-4 py-3 flex items-center justify-between shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-surface px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-200">
-            <Train size={20} />
+          <div className="w-10 h-10 bg-primary-dark rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/20 p-2">
+            <Train size={24} className="text-secondary" />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-orange-900 leading-none">{t.title}</h1>
-            <p className="text-[10px] text-orange-600/70 font-medium uppercase tracking-widest mt-1">S & Y • 2026</p>
+            <h1 className="text-sm font-bold tracking-tight text-primary-dark leading-none">{t.title}</h1>
+            <p className="text-[10px] text-primary font-medium uppercase tracking-widest mt-1">Journeys Together</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {deferredPrompt && (
+            <button 
+              onClick={handleInstall}
+              className="flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full text-[10px] font-black shadow-lg shadow-primary/30 active:scale-95 transition-all"
+            >
+              DOWNLOAD APP
+            </button>
+          )}
+
           <select 
             value={language} 
             onChange={(e) => setLanguage(e.target.value as any)}
-            className="text-[10px] font-bold bg-gray-50 border-none rounded-lg px-2 py-1 outline-none text-orange-600 cursor-pointer"
+            className="text-[10px] font-bold bg-gray-50 border-none rounded-lg px-2 py-1 outline-none text-primary-dark cursor-pointer"
           >
             <option value="en">EN</option>
             <option value="hi">हिन्दी</option>
@@ -554,13 +742,13 @@ export default function App() {
           
           {user ? (
             <div className="flex items-center gap-2">
-              <img src={user.photoURL || ''} alt="avatar" className="w-8 h-8 rounded-full border border-orange-100" />
+              <img src={user.photoURL || ''} alt="avatar" className="w-8 h-8 rounded-full border border-surface" />
               <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
                 <LogOut size={18} />
               </button>
             </div>
           ) : (
-            <button onClick={handleLogin} className="flex items-center gap-2 bg-orange-50 text-orange-700 px-4 py-2 rounded-full text-xs font-semibold hover:bg-orange-100 transition-all border border-orange-100 shadow-sm active:scale-95">
+            <button onClick={handleLogin} className="flex items-center gap-2 bg-surface text-primary-dark px-4 py-2 rounded-full text-xs font-semibold hover:bg-secondary/20 transition-all border border-secondary/30 shadow-sm active:scale-95">
               <LogIn size={16} />
               <span>{t.login}</span>
             </button>
@@ -577,55 +765,55 @@ export default function App() {
             exit={{ opacity: 0, y: -10 }}
             className="p-6 space-y-8"
           >
-            <div className="relative overflow-hidden rounded-3xl bg-[#FFF8F0] p-8 text-center border border-orange-100">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-200/20 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
+            <div className="relative overflow-hidden rounded-3xl bg-surface p-8 text-center border border-secondary/20">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <h2 className="text-4xl font-serif italic text-orange-900 mb-2">Sudheshna & Yashwanth</h2>
-                <p className="text-orange-600 font-medium tracking-widest text-xs uppercase mb-6">Ceremony • Reception • Journey</p>
+                <h2 className="text-4xl font-serif italic text-primary-dark mb-2">{t.names}</h2>
+                <p className="text-primary font-medium tracking-widest text-xs uppercase mb-6">{t.subtitle}</p>
                 
-                <div className="flex justify-center items-center gap-4 text-orange-800">
-                  <div className="bg-white/80 p-4 rounded-2xl shadow-sm border border-orange-50 flex flex-col items-center">
-                    <span className="text-2xl font-bold">26</span>
-                    <span className="text-[10px] uppercase font-semibold">Apr '26</span>
+                <div className="flex justify-center items-center gap-4 text-primary-dark">
+                  <div className="bg-white/80 p-4 rounded-2xl shadow-sm border border-secondary/10 flex flex-col items-center">
+                    <span className="text-2xl font-bold text-primary-dark">26</span>
+                    <span className="text-[10px] uppercase font-semibold text-primary">Apr '26</span>
                   </div>
-                  <div className="w-px h-12 bg-orange-200" />
+                  <div className="w-px h-12 bg-secondary/30" />
                   <div className="text-left py-2">
-                    <p className="text-xs font-semibold uppercase tracking-tight">Vande Bharat Express</p>
-                    <p className="text-[10px] text-gray-500">Warangal ↔ Vijayawada</p>
+                    <p className="text-xs font-semibold uppercase tracking-tight text-primary-dark">{t.vandeBharat}</p>
+                    <p className="text-[10px] text-gray-500">{t.warangal} ↔ {t.vijayawada}</p>
                   </div>
                 </div>
               </motion.div>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl border border-orange-100 shadow-xl shadow-orange-50/50 space-y-6">
+            <div className="bg-white p-6 rounded-3xl border border-secondary/10 shadow-xl shadow-primary/5 space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" /> Event Itinerary
+                <h3 className="font-bold text-dark flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" /> {t.eventItinerary}
                 </h3>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Live Progress</span>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">{t.liveProgress}</span>
               </div>
               
               <div className="space-y-8 relative pl-4">
-                <div className="absolute left-[23px] top-4 bottom-4 w-1 bg-gray-100 rounded-full" />
+                <div className="absolute left-[23px] top-4 bottom-4 w-1 bg-surface rounded-full" />
                 
                 {[
-                  { label: 'Train Departs Warangal', city: 'Warangal', date: 'Sun, April 26', time: '06:20 AM', icon: Train, active: true },
-                  { label: 'Wedding Ceremony', city: 'Vijayawada', date: 'Sun, April 26', time: '11:16 AM', icon: Users, active: true },
-                  { label: 'Train Departs Vijayawada', city: 'Vijayawada', date: 'Sun, April 26', time: '06:20 PM', icon: Train, active: false },
-                  { label: 'Dinner Reception', city: 'Warangal', date: 'Tue, April 28', time: '07:30 PM', icon: Calendar, active: false }
+                  { label: t.itinerary_step1, city: t.warangal, date: 'Sun, April 26', time: '06:20 AM', icon: Train, active: true },
+                  { label: t.itinerary_step2, city: t.vijayawada, date: 'Sun, April 26', time: '11:16 AM', icon: Users, active: true },
+                  { label: t.itinerary_step3, city: t.vijayawada, date: 'Sun, April 26', time: '06:20 PM', icon: Train, active: false },
+                  { label: t.itinerary_step4, city: t.warangal, date: 'Tue, April 28', time: '07:30 PM', icon: Calendar, active: false }
                 ].map((step, i) => (
                   <div key={i} className="relative flex items-start gap-4">
-                    <div className={`z-10 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center transition-all ${step.active ? 'bg-orange-600 shadow-lg shadow-orange-200' : 'bg-gray-200'}`}>
+                    <div className={`z-10 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center transition-all ${step.active ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-secondary/30'}`}>
                       <step.icon size={10} className="text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
-                        <p className={`text-xs font-black uppercase tracking-tight ${step.active ? 'text-orange-900' : 'text-gray-400'}`}>{step.label}</p>
-                        <span className={`text-[10px] font-bold ${step.active ? 'text-orange-600' : 'text-gray-300'}`}>{step.time}</span>
+                        <p className={`text-xs font-black uppercase tracking-tight ${step.active ? 'text-primary-dark' : 'text-gray-400'}`}>{step.label}</p>
+                        <span className={`text-[10px] font-bold ${step.active ? 'text-primary-dark' : 'text-gray-300'}`}>{step.time}</span>
                       </div>
                       <p className="text-[10px] text-gray-400 font-medium">{step.city} • {step.date}</p>
                     </div>
@@ -635,15 +823,15 @@ export default function App() {
 
               <button 
                 onClick={() => setActiveTab('track')}
-                className="w-full py-3 bg-[#1A1A1A] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all"
+                className="w-full py-3 bg-primary-dark text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all"
               >
-                <Train size={14} className="text-orange-500" /> {t.track}
+                <Train size={14} className="text-secondary" /> {t.track}
               </button>
             </div>
               <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/50 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Calendar size={20} /></div>
-                  <h3 className="font-bold text-gray-900">Marriage Ceremony</h3>
+                  <h3 className="font-bold text-gray-900">{t.marriageCeremony}</h3>
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
@@ -669,7 +857,7 @@ export default function App() {
               <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/50 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Calendar size={20} /></div>
-                  <h3 className="font-bold text-gray-900">Reception</h3>
+                  <h3 className="font-bold text-gray-900">{t.reception}</h3>
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
@@ -689,52 +877,52 @@ export default function App() {
                 </div>
               </div>
 
-            <div className="bg-[#1A1A1A] text-white p-6 rounded-3xl space-y-4 shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
+            <div className="bg-primary-dark text-white p-6 rounded-3xl space-y-4 shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform text-secondary">
                 <Plane size={100} />
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white/10 text-white rounded-lg"><UserCheck size={20} /></div>
-                  <h3 className="font-bold">Guest Portal</h3>
+                  <h3 className="font-bold">{t.guestPortal}</h3>
                 </div>
                 {guestMapping ? (
-                  <span className="text-[10px] font-bold bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">Verified Identity</span>
+                  <span className="text-[10px] font-bold bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">{t.verifiedIdentity}</span>
                 ) : (
-                  <span className="text-[10px] font-bold bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full border border-orange-500/30">Action Required</span>
+                  <span className="text-[10px] font-bold bg-accent/20 text-accent px-2 py-1 rounded-full border border-accent/30">{t.actionRequired}</span>
                 )}
               </div>
               
               <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-4">
                 {!user ? (
                   <div className="text-center py-2">
-                    <p className="text-[10px] text-white/60 mb-4 italic">Login to claim your seat and receive alerts.</p>
-                    <button onClick={handleLogin} className="w-full py-2 bg-white text-black rounded-xl text-xs font-black shadow-lg">CONTINUE WITH GOOGLE</button>
+                    <p className="text-[10px] text-white/60 mb-4 italic">{t.loginPrompt}</p>
+                    <button onClick={handleLogin} className="w-full py-2 bg-white text-dark rounded-xl text-xs font-black shadow-lg">{t.continueGoogle}</button>
                   </div>
                 ) : !guestMapping ? (
                   <div className="space-y-3">
-                    <p className="text-[10px] text-white/60 leading-relaxed italic">Identify yourself from the passenger list to access your personalized itinerary.</p>
-                    <button onClick={() => setActiveTab('guests')} className="w-full py-2 bg-orange-600 text-white rounded-xl text-xs font-black shadow-lg">SELECT YOUR NAME</button>
+                    <p className="text-[10px] text-white/60 leading-relaxed italic">{t.identifyPrompt}</p>
+                    <button onClick={() => setActiveTab('guests')} className="w-full py-2 bg-primary text-white rounded-xl text-xs font-black shadow-lg">{t.selectName}</button>
                     
                     {recommendedProfile && (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="mt-4 p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-between"
+                        className="mt-4 p-4 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-between"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
                             {recommendedProfile.name.charAt(0)}
                           </div>
                           <div>
-                            <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest leading-none mb-1">We Found You</p>
+                            <p className="text-[10px] text-secondary font-bold uppercase tracking-widest leading-none mb-1">We Found You</p>
                             <p className="text-sm font-bold text-white mb-0.5">{recommendedProfile.name}</p>
                             <p className="text-[9px] text-white/40">{recommendedProfile.id}</p>
                           </div>
                         </div>
                         <button 
                           onClick={() => claimProfile(recommendedProfile.id)}
-                          className="bg-white text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-orange-50 transition-colors"
+                          className="bg-white text-dark px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-surface transition-colors"
                         >
                           {t.claim}
                         </button>
@@ -745,13 +933,13 @@ export default function App() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-end">
                       <div>
-                        <p className="text-[8px] font-black tracking-widest text-white/40 uppercase">Assigned To</p>
-                        <p className="text-lg font-serif italic text-orange-400">
+                        <p className="text-[8px] font-black tracking-widest text-white/40 uppercase">{t.assignedTo}</p>
+                        <p className="text-lg font-serif italic text-secondary">
                           {PASSENGER_DATA.passengers.find(p => p.id === guestMapping.passengerId)?.name}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-[8px] font-black tracking-widest text-white/40 uppercase">Seat</p>
+                        <p className="text-[8px] font-black tracking-widest text-white/40 uppercase">{t.seat}</p>
                         <p className="text-xs font-black text-white">
                           {PASSENGER_DATA.assignments.find(a => a.passenger_id === guestMapping.passengerId && a.journey_id === selectedJourney)?.coach} - {PASSENGER_DATA.assignments.find(a => a.passenger_id === guestMapping.passengerId && a.journey_id === selectedJourney)?.seat}
                         </p>
@@ -786,7 +974,7 @@ export default function App() {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <h3 className="font-bold text-gray-900 flex items-center gap-2 italic font-serif">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-ping" /> Live Alerts
+                  <div className="w-2 h-2 bg-primary rounded-full animate-ping" /> Live Alerts
                 </h3>
                 {isAdmin && (
                   <button 
@@ -794,7 +982,7 @@ export default function App() {
                       const msg = prompt("Enter broadcast message:");
                       if (msg) sendNotification("Important Update", msg, "info");
                     }} 
-                    className="text-[10px] font-black text-orange-600 bg-orange-50 px-3 py-1 rounded-full uppercase"
+                    className="text-[10px] font-black text-primary-dark bg-surface px-3 py-1 rounded-full uppercase"
                   >
                     Broadcast
                   </button>
@@ -811,7 +999,7 @@ export default function App() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       key={n.id} 
-                      className={`p-4 rounded-3xl border ${n.type === 'warning' ? 'bg-red-50 border-red-100 text-red-900' : 'bg-white border-gray-100 shadow-sm shadow-orange-50'}`}
+                      className={`p-4 rounded-3xl border ${n.type === 'warning' ? 'bg-red-50 border-red-100 text-red-900' : 'bg-white border-gray-100 shadow-sm shadow-primary/5'}`}
                     >
                       <div className="flex justify-between items-start mb-1">
                         <p className="text-xs font-black uppercase tracking-tight">{n.title}</p>
@@ -835,13 +1023,13 @@ export default function App() {
             className="p-4 space-y-4"
           >
             {/* Search and Filters */}
-            <div className="sticky top-[64px] z-40 bg-[#FDFCFB]/80 backdrop-blur-xl py-2 flex flex-col gap-3">
-              <div className="flex gap-2 p-1 bg-gray-100 rounded-xl overflow-hidden">
+            <div className="sticky top-[64px] z-40 bg-background/80 backdrop-blur-xl py-2 flex flex-col gap-3">
+              <div className="flex gap-2 p-1 bg-surface rounded-xl overflow-hidden">
                 {PASSENGER_DATA.journeys.map(j => (
                   <button
                     key={j.id}
                     onClick={() => setSelectedJourney(j.id)}
-                    className={`flex-1 py-2 text-[10px] font-bold rounded-lg transition-all ${selectedJourney === j.id ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`flex-1 py-2 text-[10px] font-bold rounded-lg transition-all ${selectedJourney === j.id ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                   >
                     {j.id === 'J1' ? 'To Vijayawada' : 'To Warangal'}
                   </button>
@@ -849,33 +1037,33 @@ export default function App() {
               </div>
 
               <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors" size={18} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
                 <input 
                   type="text" 
-                  placeholder="Search by Name, Coach, Seat..."
+                  placeholder={t.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+                  className="w-full bg-white border border-secondary/20 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
                 />
               </div>
 
               <div className="flex items-center justify-between px-2">
                 <div className="flex gap-4">
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase">Total</span>
-                    <span className="text-sm font-bold text-gray-900">{stats.total}</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase">{t.total}</span>
+                    <span className="text-sm font-bold text-dark">{stats.total}</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-green-400 font-bold uppercase">Onboarded</span>
+                    <span className="text-[10px] text-green-400 font-bold uppercase">{t.onboarded}</span>
                     <span className="text-sm font-bold text-green-600">{stats.onboarded}</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-red-300 font-bold uppercase">Left</span>
+                    <span className="text-[10px] text-red-300 font-bold uppercase">{t.left}</span>
                     <span className="text-sm font-bold text-red-500">{stats.leftOut}</span>
                   </div>
                 </div>
                 {isAdmin && (
-                  <div className="p-2 bg-orange-50 text-orange-600 rounded-lg animate-pulse">
+                  <div className="p-2 bg-primary/10 text-primary rounded-lg animate-pulse">
                     <ShieldCheck size={16} />
                   </div>
                 )}
@@ -887,7 +1075,7 @@ export default function App() {
               <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-black uppercase tracking-widest text-blue-900 flex items-center gap-2">
-                    <MapPin className="text-blue-500" size={14} /> Guest Location Hub
+                    <MapPin className="text-blue-500" size={14} /> {t.locationHub}
                   </h4>
                   <span className="text-[8px] px-2 py-1 bg-blue-100 text-blue-600 rounded-full font-black">LIVE</span>
                 </div>
@@ -905,7 +1093,7 @@ export default function App() {
                             <div>
                               <p className="text-xs font-bold text-gray-900">{passenger?.name}</p>
                               <p className="text-[8px] text-gray-400 font-medium">
-                                Last updated: {mapping.lastLocation?.updatedAt?.toDate()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                {t.lastUpdated}: {mapping.lastLocation?.updatedAt?.toDate()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>
                           </div>
@@ -921,7 +1109,7 @@ export default function App() {
                       );
                     })}
                   {(Object.values(allGuestMappings) as GuestMapping[]).filter(m => m.lastLocation).length === 0 && (
-                    <p className="text-[10px] text-gray-400 text-center italic py-4">No guests sharing location yet</p>
+                    <p className="text-[10px] text-gray-400 text-center italic py-4">{t.noLocation}</p>
                   )}
                 </div>
               </div>
@@ -938,17 +1126,17 @@ export default function App() {
                   <motion.div 
                     layout
                     key={p.id}
-                    className={`bg-white p-4 rounded-2xl border transition-all group ${isMe ? 'border-orange-500 shadow-lg shadow-orange-100 ring-2 ring-orange-500/10' : 'border-gray-100 shadow-sm hover:shadow-md'}`}
+                    className={`bg-white p-4 rounded-2xl border transition-all group ${isMe ? 'border-primary shadow-lg shadow-primary/10 ring-2 ring-primary/10' : 'border-gray-100 shadow-sm hover:shadow-md'}`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isMe ? 'bg-orange-600 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-orange-50 group-hover:text-orange-500'}`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isMe ? 'bg-primary text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-surface group-hover:text-primary'}`}>
                           {isMe ? <UserCheck size={18} /> : <Users size={18} />}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="text-sm font-bold text-gray-900">{p.name}</h4>
-                            {isMe && <span className="text-[8px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black uppercase">You</span>}
+                            {isMe && <span className="text-[8px] bg-secondary/30 text-primary-dark px-1.5 py-0.5 rounded font-black uppercase">{t.you}</span>}
                           </div>
                           <p className="text-[10px] text-gray-400 font-medium">
                             ID: {p.id} {p.aliases && `• Alias: ${p.aliases}`}
@@ -957,7 +1145,7 @@ export default function App() {
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <StatusBadge status={status} />
-                        <span className={`text-[10px] font-bold flex items-center gap-1 ${isMe ? 'text-orange-600' : 'text-gray-400'}`}>
+                        <span className={`text-[10px] font-bold flex items-center gap-1 ${isMe ? 'text-primary' : 'text-gray-400'}`}>
                           <Train size={10} /> {assignment?.coach}-{assignment?.seat}
                         </span>
                       </div>
@@ -973,7 +1161,7 @@ export default function App() {
                             }}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-black transition-all hover:bg-blue-700 active:scale-95 shadow-md shadow-blue-100"
                           >
-                            <Train size={12} /> CHECK SEAT ({assignment?.coach}-{assignment?.seat})
+                            <Train size={12} /> {t.checkSeat} ({assignment?.coach}-{assignment?.seat})
                           </button>
                           
                           <div className="flex gap-2">
@@ -995,9 +1183,9 @@ export default function App() {
                             ) : !guestMapping ? (
                               <button 
                                 onClick={() => claimProfile(p.id)}
-                                className="px-4 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-black uppercase tracking-tight hover:bg-orange-100"
+                                className="px-4 py-1.5 bg-surface text-primary-dark rounded-lg text-[10px] font-black uppercase tracking-tight hover:bg-secondary/30"
                               >
-                                This is me
+                                {t.thisIsMe}
                               </button>
                             ) : isMe && (
                               <div className="text-[10px] font-bold text-gray-300 uppercase italic">Your Seat</div>
@@ -1027,7 +1215,7 @@ export default function App() {
                       setSelectedJourney(j.id);
                       setSelectedCoach(null); // Reset coach when changing journey
                     }}
-                    className={`flex-1 py-2 text-[10px] font-bold rounded-lg transition-all ${selectedJourney === j.id ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`flex-1 py-2 text-[10px] font-bold rounded-lg transition-all ${selectedJourney === j.id ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                   >
                     {j.id === 'J1' ? 'To Vijayawada' : 'To Warangal'}
                   </button>
@@ -1036,11 +1224,11 @@ export default function App() {
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/50 space-y-6">
+              <div className="bg-white p-6 rounded-3xl border border-secondary/10 shadow-xl shadow-primary/5 space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xl font-serif italic text-gray-900">Coach Hierarchy</h4>
-                    <p className="text-[10px] text-orange-600 font-bold tracking-widest uppercase">Select Coach</p>
+                    <h4 className="text-xl font-serif italic text-dark">{t.coachHierarchy}</h4>
+                    <p className="text-[10px] text-primary font-bold tracking-widest uppercase">{t.selectCoach}</p>
                   </div>
                   <div className="flex flex-wrap gap-1.5 max-w-[180px] justify-end">
                     {TRAIN_DETAILS[selectedJourney === 'J1' ? '20707' : '20708']?.coaches.filter(c => c.startsWith('C') || c.startsWith('E')).map(c => {
@@ -1049,7 +1237,7 @@ export default function App() {
                         <button 
                           key={c}
                           onClick={() => setSelectedCoach(c)}
-                          className={`w-9 h-9 flex items-center justify-center rounded-xl text-[11px] font-black transition-all ${selectedCoach === c ? 'bg-orange-600 text-white shadow-lg shadow-orange-200 scale-110' : 'bg-gray-50 border border-gray-100 text-gray-400 hover:text-orange-500 hover:bg-orange-50'} ${!hasGuests && !isAdmin ? 'opacity-30' : ''}`}
+                          className={`w-9 h-9 flex items-center justify-center rounded-xl text-[11px] font-black transition-all ${selectedCoach === c ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-110' : 'bg-gray-50 border border-gray-100 text-gray-400 hover:text-primary hover:bg-surface'} ${!hasGuests && !isAdmin ? 'opacity-30' : ''}`}
                         >
                           {c}
                         </button>
@@ -1077,30 +1265,30 @@ export default function App() {
                   ) : (
                     <div className="p-12 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100 flex flex-col items-center gap-3">
                       <Users className="text-gray-200" size={32} />
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-relaxed">Choose a highlighted coach<br/>to visualize seating</p>
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-relaxed">{t.chooseCoach}</p>
                     </div>
                   )}
                 </AnimatePresence>
               </div>
 
               {/* Live Tracking CTA */}
-              <div className="bg-[#FFF8F1] p-6 rounded-3xl border border-orange-100 shadow-sm space-y-4">
+              <div className="bg-surface p-6 rounded-3xl border border-secondary/20 shadow-sm space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                  <div className="p-2 bg-secondary/30 text-primary-dark rounded-lg">
                     <MapPin size={20} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-gray-900 uppercase tracking-tight">Live Tracking</h4>
-                    <p className="text-[10px] text-orange-600 uppercase font-bold">Vande Bharat Exp</p>
+                    <h4 className="text-sm font-bold text-dark uppercase tracking-tight">Live Tracking</h4>
+                    <p className="text-[10px] text-primary uppercase font-bold">Vande Bharat Exp</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setActiveTab('track')}
-                  className="w-full py-4 bg-orange-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-200 active:scale-95 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   Open Live Tracker <ChevronRight size={14} />
                 </button>
-                <p className="text-[9px] text-center text-orange-800/40 font-medium">Powered by Where Is My Train</p>
+                <p className="text-[9px] text-center text-primary-dark/40 font-medium">Powered by Where Is My Train</p>
               </div>
             </div>
           </motion.div>
@@ -1113,22 +1301,22 @@ export default function App() {
             className="p-6 space-y-6"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-serif italic text-gray-900">Alerts & Broadcasts</h3>
+              <h3 className="text-2xl font-serif italic text-primary-dark">{t.alertsAndBroadcasts}</h3>
               {isAdmin && (
                 <button 
                   onClick={() => setIsNotifModalOpen(true)}
-                  className="bg-orange-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-orange-200"
+                  className="bg-primary text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-primary/20"
                 >
-                  Send Broadcast
+                  {t.sendBroadcast}
                 </button>
               )}
             </div>
 
             <div className="space-y-4">
               {filteredNotifications.length === 0 ? (
-                <div className="p-12 text-center bg-gray-50 rounded-[40px] border-2 border-dashed border-gray-100">
-                  <Info className="mx-auto text-gray-200 mb-4" size={40} />
-                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">No active announcements</p>
+                <div className="p-12 text-center bg-surface rounded-[40px] border-2 border-dashed border-secondary/20">
+                  <Info className="mx-auto text-secondary/30 mb-4" size={40} />
+                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{t.noAnnouncements}</p>
                 </div>
               ) : (
                 filteredNotifications.map(n => (
@@ -1136,14 +1324,14 @@ export default function App() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     key={n.id}
-                    className={`p-6 rounded-[32px] border ${n.type === 'warning' ? 'bg-red-50 border-red-100 text-red-900' : 'bg-white border-gray-100 shadow-sm shadow-orange-50'}`}
+                    className={`p-6 rounded-[32px] border ${n.type === 'warning' ? 'bg-red-50 border-red-100 text-red-900' : 'bg-white border-gray-100 shadow-sm shadow-primary/5'}`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2">
                         <h4 className="text-sm font-black uppercase tracking-tight">{n.title}</h4>
                         {n.journeyId !== 'all' && (
-                          <span className="text-[8px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black uppercase">
-                            {n.journeyId === 'J1' ? 'Vijayawada Bound' : 'Warangal Bound'}
+                          <span className="text-[8px] bg-secondary/30 text-primary-dark px-1.5 py-0.5 rounded font-black uppercase">
+                            {n.journeyId === 'J1' ? t.vijayawadaBound : t.warangalBound}
                           </span>
                         )}
                       </div>
@@ -1167,15 +1355,15 @@ export default function App() {
           >
             <div className="flex items-center justify-between px-2">
               <div>
-                <h3 className="text-xl font-serif italic text-gray-900">Live Tracker</h3>
-                <p className="text-[10px] text-orange-600 font-black uppercase tracking-widest leading-none">Train No: {getActiveTrainNum()}</p>
+                <h3 className="text-xl font-serif italic text-primary-dark">Live Tracker</h3>
+                <p className="text-[10px] text-primary font-black uppercase tracking-widest leading-none">Train No: {getActiveTrainNum()}</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-[10px] font-bold text-gray-400">Live Feed</span>
               </div>
             </div>
-            <div className="flex-1 bg-white rounded-[32px] border border-gray-100 shadow-xl overflow-hidden relative min-h-[500px]">
+            <div className="flex-1 bg-white rounded-[32px] border border-surface shadow-xl overflow-hidden relative min-h-[500px]">
               <iframe 
                 src={getTrackingUrl()}
                 className="absolute inset-0 w-full h-full border-none"
@@ -1184,7 +1372,7 @@ export default function App() {
             </div>
             <button 
               onClick={() => window.open(getTrackingUrl(), '_blank')}
-              className="w-full py-3 bg-gray-100 text-gray-600 rounded-2xl text-[10px] font-bold uppercase flex items-center justify-center gap-2"
+              className="w-full py-3 bg-surface text-primary-dark rounded-2xl text-[10px] font-bold uppercase flex items-center justify-center gap-2"
             >
               Open in Browser <ExternalLink size={14} />
             </button>
@@ -1200,7 +1388,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-dark/60 backdrop-blur-sm"
             onClick={() => setSelectedSeat(null)}
           >
             <motion.div 
@@ -1210,11 +1398,11 @@ export default function App() {
               className="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl relative overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
-              <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-orange-500 to-orange-600 -z-0" />
+              <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-primary to-primary-dark -z-0" />
               
               <div className="relative z-10 space-y-6 pt-4">
                 <div className="flex justify-between items-start">
-                  <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center text-orange-600 mb-4 border border-orange-100">
+                  <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center text-primary mb-4 border border-secondary/10">
                     <Users size={32} />
                   </div>
                   <button onClick={() => setSelectedSeat(null)} className="p-2 bg-white/20 text-white rounded-full hover:bg-white/40 transition-colors">
@@ -1223,27 +1411,27 @@ export default function App() {
                 </div>
 
                 <div>
-                  <h3 className="text-2xl font-serif italic text-gray-900">{selectedSeat.passenger.name}</h3>
-                  <p className="text-[10px] text-orange-600 font-black uppercase tracking-[0.2em] mt-1">Passenger ID: {selectedSeat.passenger.id}</p>
+                  <h3 className="text-2xl font-serif italic text-primary-dark">{selectedSeat.passenger.name}</h3>
+                  <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mt-1">Passenger ID: {selectedSeat.passenger.id}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div className="p-4 bg-background rounded-2xl border border-secondary/10">
                     <p className="text-[8px] font-black text-gray-400 uppercase mb-1">Coach</p>
-                    <p className="text-xl font-black text-gray-900">{selectedSeat.assignment.coach}</p>
+                    <p className="text-xl font-black text-primary-dark">{selectedSeat.assignment.coach}</p>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div className="p-4 bg-background rounded-2xl border border-secondary/10">
                     <p className="text-[8px] font-black text-gray-400 uppercase mb-1">Seat Number</p>
-                    <p className="text-xl font-black text-gray-900">{selectedSeat.assignment.seat}</p>
+                    <p className="text-xl font-black text-primary-dark">{selectedSeat.assignment.seat}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-2xl border border-orange-100">
-                  <div className="p-2 bg-white rounded-lg text-orange-600 shadow-sm">
+                <div className="flex items-center gap-3 p-4 bg-surface rounded-2xl border border-secondary/20">
+                  <div className="p-2 bg-white rounded-lg text-primary shadow-sm">
                     <CheckCircle2 size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-orange-900 uppercase">Boarding Status</p>
+                    <p className="text-[10px] font-black text-primary-dark uppercase">Boarding Status</p>
                     <StatusBadge status={statuses[`${selectedSeat.passenger.id}_${selectedJourney}`]?.status || 'pending'} />
                   </div>
                 </div>
@@ -1286,7 +1474,7 @@ export default function App() {
             className="fixed bottom-24 right-6 w-[calc(100%-48px)] max-w-[320px] h-[450px] bg-white rounded-[32px] shadow-2xl z-[70] border border-gray-100 flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-orange-600 p-4 flex items-center justify-between">
+            <div className="bg-primary p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white">
                   <MessageSquare size={18} />
@@ -1302,7 +1490,7 @@ export default function App() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {chatMessages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-2xl text-[12px] font-medium leading-relaxed ${msg.role === 'user' ? 'bg-orange-600 text-white rounded-tr-none' : 'bg-gray-100 text-gray-800 rounded-tl-none'}`}>
+                  <div className={`max-w-[80%] p-3 rounded-2xl text-[12px] font-medium leading-relaxed ${msg.role === 'user' ? 'bg-primary text-white rounded-tr-none' : 'bg-surface text-primary-dark rounded-tl-none border border-secondary/10 shadow-sm'}`}>
                     {msg.text}
                   </div>
                 </div>
@@ -1310,37 +1498,37 @@ export default function App() {
             </div>
 
             {/* Quick Actions */}
-            <div className="p-3 border-t border-gray-100 bg-gray-50 flex flex-wrap gap-2">
+            <div className="p-3 border-t border-surface bg-background flex flex-wrap gap-2">
               <button 
                 onClick={() => {
                   setIsChatOpen(false);
                   setActiveTab('track');
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 rounded-full text-[10px] font-bold text-orange-600 shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-secondary/20 rounded-full text-[10px] font-bold text-primary shadow-sm"
               >
-                <Train size={12} /> Train Track
+                <Train size={12} /> {t.trainTrack}
               </button>
               <button 
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-[10px] font-bold text-gray-600 shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-secondary/20 rounded-full text-[10px] font-bold text-gray-600 shadow-sm"
                 onClick={() => setActiveTab('layout')}
               >
-                <QrCode size={12} /> Coach Map
+                <QrCode size={12} /> {t.coachMap}
               </button>
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-gray-100 flex gap-2">
+            <div className="p-3 border-t border-surface flex gap-2">
               <input 
                 type="text"
                 value={chatInput}
                 onChange={e => setChatInput(e.target.value)}
                 onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask me anything..."
-                className="flex-1 px-4 py-2 bg-gray-50 border-none rounded-xl text-xs focus:ring-1 focus:ring-orange-500"
+                placeholder={t.askAnything}
+                className="flex-1 px-4 py-2 bg-gray-50 border-none rounded-xl text-xs focus:ring-1 focus:ring-primary"
               />
               <button 
                 onClick={handleSendMessage}
-                className="p-2 bg-orange-600 text-white rounded-xl shadow-lg shadow-orange-100"
+                className="p-2 bg-primary text-white rounded-xl shadow-lg shadow-primary/10"
               >
                 <Send size={16} />
               </button>
@@ -1369,7 +1557,7 @@ export default function App() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setActiveTab('track')}
-            className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center border-4 border-white shadow-orange-600/20 ${activeTab === 'track' ? 'bg-[#1A1A1A] text-white' : 'bg-orange-600 text-white'}`}
+            className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center border-4 border-white shadow-primary/20 ${activeTab === 'track' ? 'bg-dark text-white' : 'bg-primary text-white'}`}
           >
             <div className="relative">
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse" />
@@ -1380,38 +1568,38 @@ export default function App() {
       </div>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-sm bg-white/95 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl z-50 flex items-stretch p-2">
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-sm bg-white/95 backdrop-blur-xl border border-secondary/20 rounded-2xl shadow-2xl z-50 flex items-stretch p-2">
         <button 
           onClick={() => setActiveTab('home')}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'home' ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'home' ? 'text-primary bg-primary/10' : 'text-gray-400 hover:text-gray-600'}`}
         >
           <Calendar size={20} />
           <span className="text-[9px] font-bold uppercase tracking-tighter">Event</span>
         </button>
         <button 
           onClick={() => setActiveTab('guests')}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'guests' ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'guests' ? 'text-primary bg-primary/10' : 'text-gray-400 hover:text-gray-600'}`}
         >
           <Users size={20} />
           <span className="text-[9px] font-bold uppercase tracking-tighter">{t.guests}</span>
         </button>
         <button 
           onClick={() => setActiveTab('layout')}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'layout' ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'layout' ? 'text-primary bg-primary/10' : 'text-gray-400 hover:text-gray-600'}`}
         >
           <Train size={20} />
           <span className="text-[9px] font-bold uppercase tracking-tighter">{t.layout}</span>
         </button>
         <button 
           onClick={() => setActiveTab('track')}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'track' ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl ${activeTab === 'track' ? 'text-primary bg-primary/10' : 'text-gray-400 hover:text-gray-600'}`}
         >
           <MapPin size={20} />
           <span className="text-[9px] font-bold uppercase tracking-tighter">{t.track.split(' ')[0]}</span>
         </button>
         <button 
           onClick={() => setActiveTab('alerts')}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl relative ${activeTab === 'alerts' ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all rounded-xl relative ${activeTab === 'alerts' ? 'text-primary bg-primary/10' : 'text-gray-400 hover:text-gray-600'}`}
         >
           <AnimatePresence>
             {notifications.length > 0 && activeTab !== 'alerts' && (
@@ -1441,7 +1629,7 @@ export default function App() {
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white w-full max-w-sm rounded-[40px] overflow-hidden shadow-2xl"
             >
-              <div className="bg-orange-600 p-6 flex justify-between items-center text-white">
+              <div className="bg-primary p-6 flex justify-between items-center text-white">
                 <h3 className="text-xl font-serif italic text-white">New Broadcast</h3>
                 <button onClick={() => setIsNotifModalOpen(false)} className="hover:rotate-90 transition-transform">
                   <X />
@@ -1456,8 +1644,8 @@ export default function App() {
                     className="w-full bg-gray-50 border-none rounded-xl text-xs font-bold p-3 outline-none ring-1 ring-gray-100"
                   >
                     <option value="all">Everyone</option>
-                    <option value="J1">To Vijayawada (20707)</option>
-                    <option value="J2">To Warangal (20708)</option>
+                    <option value="J1">{t.toVijayawada} (20707)</option>
+                    <option value="J2">{t.toWarangal} (20708)</option>
                   </select>
                 </div>
                 <div className="space-y-1">
@@ -1501,7 +1689,7 @@ export default function App() {
                       alert("Broadcast sent successfully!");
                     }
                   }}
-                  className="w-full py-4 bg-orange-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-200 active:scale-95 transition-all"
+                  className="w-full py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-95 transition-all"
                 >
                   SEND NOTIFICATION
                 </button>

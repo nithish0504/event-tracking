@@ -5,4 +5,12 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-primary: #7FA98A;
+  --color-primary-dark: #1E3A35;
+  --color-dark: #1F2937;
+  --color-background: #F7F9F7;
+  --color-surface: #E8F3EC;
+  --color-secondary: #B7D1C1;
+  --color-accent: #F4B942;
 }

@@ -1,6 +1,8 @@
 {
-  "name": "Sudheshna & Yashwanth Wedding Planner",
-  "description": "A comprehensive wedding and travel itinerary management app for the marriage of Dr. Yashwanth and Dr. Sudheshna.",
-  "requestFramePermissions": [],
+  "name": "CoYatri",
+  "description": "Seamless group travel coordination for the wedding journey. Track trains, view seating, and stay updated together.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
   "majorCapabilities": []
 }

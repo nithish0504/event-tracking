@@ -1,0 +1,22 @@
+{
+  "name": "CoYatri - Your Wedding Journey Companion",
+  "short_name": "CoYatri",
+  "description": "Smart itinerary and track companion for the Yatri wedding journey.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFCFB",
+  "theme_color": "#7FA98A",
+  "icons": [
+    {
+      "src": "https://images.unsplash.com/photo-1476124369491-e7addf5db371?q=80&w=200&auto=format&fit=crop",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1476124369491-e7addf5db371?q=80&w=512&auto=format&fit=crop",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
